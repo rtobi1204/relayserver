@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Hosting;
+using System.IO;
 using Serilog;
+using Serilog.Events;
 
 namespace Thinktecture.Relay.Connector.Windows;
 
@@ -35,10 +37,17 @@ public class Program
 			.UseWindowsService()
 			.UseSerilog((context, loggerConfiguration) =>
 			{
+				var logDir = Path.Combine(AppContext.BaseDirectory, "logs");
+				Directory.CreateDirectory(logDir);
 				loggerConfiguration
 					.MinimumLevel.Information()
-					.Enrich.FromLogContext()
-					.Enrich.WithProperty("Application", "Connector")
+					.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+					.MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+					.WriteTo.File(
+						path: Path.Combine(logDir, "connector-.log"),
+						rollingInterval: RollingInterval.Day,
+						retainedFileCountLimit: 7,
+						shared: true)
 					.WriteTo.Console();
 			})
 			.ConfigureServices(Startup.ConfigureServices);
