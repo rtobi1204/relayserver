@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Thinktecture.Relay.Abstractions\Thinktecture.Relay.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Thinktecture.Relay.Connector\Thinktecture.Relay.Connector.csproj" />
+    <ProjectReference Include="..\..\Thinktecture.Relay.Connector.Abstractions\Thinktecture.Relay.Connector.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Thinktecture.Relay.Connector.Protocols.SignalR\Thinktecture.Relay.Connector.Protocols.SignalR.csproj" />
+  </ItemGroup>
+
+</Project>
