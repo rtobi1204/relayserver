@@ -43,7 +43,6 @@ public class Startup
 			.AddSignalRConnectorTransport()
 			.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options))
 			.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options))
-			.AddForwardedHeaderInterceptor()
 			.AddClientRequestInterceptor<DemoRequestInterceptor>()
 			.AddTargetResponseInterceptor<DemoResponseInterceptor>();
 
