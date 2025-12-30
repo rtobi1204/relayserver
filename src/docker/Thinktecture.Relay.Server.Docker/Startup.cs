@@ -30,11 +30,6 @@ public class Startup
 				options.Authority = authorityUri.AbsoluteUri;
 				options.Audience = Constants.DefaultAuthenticationAudience;
 				options.RequireHttpsMetadata = authorityUri.Scheme == "https";
-
-				// This is a demo environment, we should try to recover fast if we can't access our Identity Provider
-				// when fetching its OpenId configuration. Otherwise we would stay in failed state in the MS JwtBearer
-				// ConfigurationManager until its default refresh interval of 5 minutes passed.
-				options.RefreshInterval = TimeSpan.FromSeconds(15);
 			});
 
 		services.AddRelayServerDbContext(Configuration);
@@ -43,8 +38,7 @@ public class Startup
 			.AddSignalRConnectorTransport()
 			.AddFileBodyStore(options => Configuration.GetSection("BodyStore").Bind(options))
 			.AddMaintenanceJobs(options => Configuration.GetSection("Maintenance").Bind(options))
-			.AddClientRequestInterceptor<DemoRequestInterceptor>()
-			.AddTargetResponseInterceptor<DemoResponseInterceptor>();
+			.AddForwardedHeaderInterceptor();
 
 		services.Configure<StatisticsOptions>(options => Configuration.GetSection("Statistics").Bind(options));
 	}
