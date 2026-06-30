@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
 
-    <VersionPrefix>3.1.0</VersionPrefix>
+    <VersionPrefix>3.1.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Version Condition="'$(BuildNumber)' != ''">$(VersionPrefix)-$(VersionSuffix)-$(BuildNumber)</Version>
 

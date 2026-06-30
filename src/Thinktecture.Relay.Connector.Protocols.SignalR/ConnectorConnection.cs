@@ -113,21 +113,25 @@ public partial class ConnectorConnection<TRequest, TResponse, TAcknowledge> : IC
 
 	private async Task HubConnectionClosed(Exception? ex)
 	{
-		if (ex is null or OperationCanceledException)
+		var token = _cancellationTokenSource?.Token;
+
+		// A null or cancelled token means we initiated the shutdown ourselves (DisconnectAsync/Dispose),
+		// so we stay closed. Any other close was NOT requested by us - a server-initiated graceful close
+		// (e.g. server recycle/redeploy or an intermediary closing an idle WebSocket, which arrives with a
+		// null exception), a dropped transport, or exhausted automatic reconnect - and we must reconnect.
+		// SignalR's automatic reconnect does not fire for a graceful close, so without this the connector
+		// would sit idle but "connected" until manually restarted.
+		if (token is null || token.Value.IsCancellationRequested)
 		{
 			Log.ConnectionClosedGracefully(_logger, _connectionId);
+			return;
 		}
-		else
-		{
-			Log.ConnectionClosed(_logger, _connectionId);
 
-			var token = _cancellationTokenSource?.Token;
-			if (token is null) return;
+		Log.ConnectionClosed(_logger, _connectionId);
 
-			await Reconnecting.InvokeAsync(this, _connectionId);
-			await ConnectAsyncInternal(token.Value);
-			await Reconnected.InvokeAsync(this, _connectionId);
-		}
+		await Reconnecting.InvokeAsync(this, _connectionId);
+		await ConnectAsyncInternal(token.Value);
+		await Reconnected.InvokeAsync(this, _connectionId);
 	}
 
 	private async Task HubConnectionReconnecting(Exception? ex)
