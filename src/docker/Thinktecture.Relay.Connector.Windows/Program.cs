@@ -38,9 +38,14 @@ public class Program
 				var logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "RelayConnector", "Logs");
 				Directory.CreateDirectory(logDir);
 				loggerConfiguration
-					.MinimumLevel.Information()
+					.MinimumLevel.Debug()
 					.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
 					.MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+					// transport-level diagnostics for the hub connection - a stalled or half-dead connection
+					// shows up here and nowhere else
+					.MinimumLevel.Override("Microsoft.AspNetCore.SignalR.Client", Serilog.Events.LogEventLevel.Information)
+					.MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections.Client",
+						Serilog.Events.LogEventLevel.Information)
 					.WriteTo.File(
 						path: Path.Combine(logDir, "connector-.log"),
 						rollingInterval: RollingInterval.Day,

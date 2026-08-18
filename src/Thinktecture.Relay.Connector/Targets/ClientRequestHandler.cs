@@ -64,23 +64,26 @@ public partial class ClientRequestHandler<TRequest, TResponse, TAcknowledge> : I
 	{
 		if (cancellationToken.IsCancellationRequested) return;
 
-		using var scope = _serviceProvider.CreateScope();
-		var worker = scope.ServiceProvider.GetRequiredService<IClientRequestWorker<TRequest, TResponse>>();
-
-		if (request.AcknowledgeMode == AcknowledgeMode.Manual)
-		{
-			var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
-			request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = [url];
-		}
-
-		if (request.EnableTracing)
-		{
-			request.HttpHeaders[Constants.HeaderNames.RequestId] = [request.RequestId.ToString()];
-			request.HttpHeaders[Constants.HeaderNames.RequestOriginId] = [request.RequestOriginId.ToString()];
-		}
-
+		// this task is fire-and-forget (see HandleAsync), so everything - including the scope creation, worker
+		// resolution and header setup - must be inside the try, otherwise a throw here becomes an unobserved
+		// task exception: no log entry, and no acknowledgement for a request the server is still waiting on
 		try
 		{
+			using var scope = _serviceProvider.CreateScope();
+			var worker = scope.ServiceProvider.GetRequiredService<IClientRequestWorker<TRequest, TResponse>>();
+
+			if (request.AcknowledgeMode == AcknowledgeMode.Manual)
+			{
+				var url = new Uri(_acknowledgeEndpoint, $"{request.AcknowledgeOriginId}/{request.RequestId}").ToString();
+				request.HttpHeaders[Constants.HeaderNames.AcknowledgeUrl] = [url];
+			}
+
+			if (request.EnableTracing)
+			{
+				request.HttpHeaders[Constants.HeaderNames.RequestId] = [request.RequestId.ToString()];
+				request.HttpHeaders[Constants.HeaderNames.RequestOriginId] = [request.RequestOriginId.ToString()];
+			}
+
 			var response = await worker.HandleAsync(request, cancellationToken);
 			if (request.DiscardConnectorResponse)
 			{

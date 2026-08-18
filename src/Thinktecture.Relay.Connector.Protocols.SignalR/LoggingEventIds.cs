@@ -4,6 +4,7 @@ internal static class LoggingEventIds
 {
 	public const int AcknowledgeTransportTransportingAck = 10001;
 	public const int AcknowledgeTransportErrorTransportingAck = 10002;
+	public const int AcknowledgeTransportTransportedAck = 10003;
 
 	public const int ConnectorConnectionDisconnecting = 10101;
 	public const int ConnectorConnectionDisconnected = 10102;

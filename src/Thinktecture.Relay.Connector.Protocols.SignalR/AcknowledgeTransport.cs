@@ -33,6 +33,7 @@ public partial class AcknowledgeTransport<T> : IAcknowledgeTransport<T>
 		{
 			Log.TransportingAck(_logger, request, request.RequestId, _hubConnection.ConnectionId);
 			await _hubConnection.InvokeAsync("Acknowledge", request, cancellationToken);
+			Log.TransportedAck(_logger, request.RequestId, _hubConnection.ConnectionId);
 		}
 		catch (Exception ex)
 		{
